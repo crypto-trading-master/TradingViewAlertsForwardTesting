@@ -7,12 +7,23 @@ import os
 
 def run():
 
-    columnName = "VarCharValue"
-
     with open('config.json', 'r') as f:
         config = json.load(f)
 
     load_dotenv()
+
+    startBalance = config['startBalance']
+    fees = ['fees']
+    leverage = config['leverage']
+
+    if leverage == 0:
+        leverage = 1
+
+    print('Using leverage:', leverage)
+    print('Start Balance:', startBalance)
+    print()
+
+    columnName = "VarCharValue"
 
     url = 'https://rt.pipedream.com/sql'
     hed = {'Authorization': 'Bearer ' + os.getenv("API_KEY")}
@@ -47,7 +58,12 @@ def run():
         lastPrice = 0
         lastAction = ""
 
-        currBalance = config['startBalance']
+        currBalance = startBalance
+        noOfTrades = 0
+        noOfTradesWon = 0
+        noOfTradesLost = 0
+        highestProfit = 0
+        highestLoss = 0
 
         for row in rows:
             rowCounter += 1
@@ -60,14 +76,28 @@ def run():
                 alertPrice = float(columns[4][columnName])
 
                 if alertAction != lastAction:
+
+                    noOfTrades += 1
+
                     if lastPrice == 0:
                         lastPrice = alertPrice
                     if alertAction == 'buy':
-                        profit = ((lastPrice / alertPrice) - 1)
+                        profit = ((lastPrice / alertPrice) - 1) * leverage
                     else:
-                        profit = ((alertPrice / lastPrice) - 1)
+                        profit = ((alertPrice / lastPrice) - 1) * leverage
+
+                    if profit >= 0:
+                        noOfTradesWon += 1
+
+                    else:
+                        noOfTradesLost += 1
 
                     profitPercent = profit * 100
+                    if profitPercent > highestProfit:
+                        highestProfit = profitPercent
+                    if profitPercent < highestLoss:
+                        highestLoss = profitPercent
+
                     currBalance *= (1 + profit)
 
                     '''
@@ -86,6 +116,12 @@ def run():
 
         print('Interval:', interval)
         print('Final balance:', currBalance)
+        print('No. of trades:', noOfTrades)
+        print('No. of trades won:', noOfTradesWon)
+        print('Highest profit %:', highestProfit)
+        print('No. of trades lost:', noOfTradesLost)
+        print('Highest loss %:', highestLoss)
+        print()
 
 
 if __name__ == "__main__":
