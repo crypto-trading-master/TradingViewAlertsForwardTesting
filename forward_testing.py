@@ -14,7 +14,7 @@ def run():
 
     url = 'https://rt.pipedream.com/sql'
     hed = {'Authorization': 'Bearer ' + os.getenv("API_KEY")}
-    data = {'query': "SELECT * FROM tradingview_alerts ORDER BY time"}
+    data = {'query': "SELECT * FROM tradingview_alerts WHERE interval = '5' ORDER BY time"}
 
     response = requests.post(url, json=data, headers=hed)
 
@@ -22,23 +22,46 @@ def run():
     rows = resultSet["Rows"]
 
     rowCounter = 0
-    column_caption = []
+    columnName = "VarCharValue"
+    lastPrice = 0
+    lastAction = ""
+    profit = 0
+    profitAmount = 0
+    profitPercent = 0
+    currBalance = config['startBalance']
 
     for row in rows:
         rowCounter += 1
         columns = row["Data"]
         if rowCounter > 1:
-            alert_time = columns[0]["VarCharValue"]
-            alert_ticker = columns[1]["VarCharValue"]
-            alert_interval = columns[2]["VarCharValue"]
-            alert_action = columns[3]["VarCharValue"]
-            alert_price = columns[4]["VarCharValue"]
+            alertTime = columns[0][columnName]
+            alertTicker = columns[1][columnName]
+            alertInterval = columns[2][columnName]
+            alertAction = columns[3][columnName]
+            alertPrice = float(columns[4][columnName])
 
-            print(alert_time)
-            print(alert_ticker)
-            print(alert_interval)
-            print(alert_action)
-            print(alert_price)
+            if alertAction != lastAction:
+                if lastPrice == 0:
+                    lastPrice = alertPrice
+                if alertAction == 'buy':
+                    profit = ((lastPrice / alertPrice) - 1)
+                else:
+                    profit = ((alertPrice / lastPrice) - 1)
+
+                profitPercent = profit * 100
+                currBalance *= (1 + profit)
+
+                print('Action:', alertAction)
+                print('Last price:', lastPrice)
+                print('Alert price:', alertPrice)
+                print('Profit:', profit)
+                print('Profit %:', profitPercent)
+                print('Current balance:', currBalance)
+                print()
+
+                lastPrice = alertPrice
+
+            lastAction = alertAction
 
 
 if __name__ == "__main__":
