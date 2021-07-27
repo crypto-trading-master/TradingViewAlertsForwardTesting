@@ -13,7 +13,7 @@ def run():
     load_dotenv()
 
     startBalance = config['startBalance']
-    fees = ['fees']
+    fees = config['fees']
     leverage = config['leverage']
 
     if leverage == 0:
@@ -85,6 +85,9 @@ def run():
                         profit = ((lastPrice / alertPrice) - 1) * leverage
                     else:
                         profit = ((alertPrice / lastPrice) - 1) * leverage
+
+                    profitFees = profit * fees
+                    profit -= profitFees
 
                     if profit >= 0:
                         noOfTradesWon += 1

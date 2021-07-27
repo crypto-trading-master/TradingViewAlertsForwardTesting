@@ -1,5 +1,5 @@
 {
     "startBalance": 100,
     "leverage": 10,
-    "fees": 0.001
+    "fees": 0.0004
 }
