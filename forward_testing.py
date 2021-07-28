@@ -55,7 +55,6 @@ def run():
 
         rowCounter = 0
 
-        lastPrice = 0
         lastAction = ""
 
         currBalance = startBalance
@@ -64,6 +63,7 @@ def run():
         noOfTradesLost = 0
         highestProfit = 0
         highestLoss = 0
+        coinAmount = 0
 
         for row in rows:
             rowCounter += 1
@@ -79,29 +79,31 @@ def run():
 
                     noOfTrades += 1
 
-                    if lastPrice == 0:
-                        lastPrice = alertPrice
-                    if alertAction == 'buy':
-                        profit = ((lastPrice / alertPrice) - 1) * leverage
-                    else:
-                        profit = ((alertPrice / lastPrice) - 1) * leverage
+                    if coinAmount > 0:
 
-                    profitFees = profit * fees
-                    profit -= profitFees
+                        # Close Position -> Not for first alert
 
-                    if profit >= 0:
-                        noOfTradesWon += 1
+                        lastBalance = currBalance
+                        feesAmount = coinAmount * alertPrice * fees
+                        currBalance = coinAmount * alertPrice / leverage - feesAmount
 
-                    else:
-                        noOfTradesLost += 1
+                        profit = currBalance - lastBalance
 
-                    profitPercent = profit * 100
-                    if profitPercent > highestProfit:
-                        highestProfit = profitPercent
-                    if profitPercent < highestLoss:
-                        highestLoss = profitPercent
+                        if profit >= 0:
+                            noOfTradesWon += 1
+                        else:
+                            noOfTradesLost += 1
 
-                    currBalance *= (1 + profit)
+                        profitPercent = (currBalance / lastBalance - 1) * 100
+                        if profitPercent > highestProfit:
+                            highestProfit = profitPercent
+                        if profitPercent < highestLoss:
+                            highestLoss = profitPercent
+
+                    # Open new position
+
+                    feesAmount = currBalance * leverage * fees
+                    coinAmount = (currBalance * leverage - feesAmount) / alertPrice
 
                     '''
                     print('Action:', alertAction)
@@ -112,8 +114,6 @@ def run():
                     print('Current balance:', currBalance)
                     print()
                     '''
-
-                    lastPrice = alertPrice
 
                 lastAction = alertAction
 
