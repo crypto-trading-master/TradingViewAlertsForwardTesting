@@ -44,6 +44,8 @@ def run():
 
     intervals.sort()
 
+    # intervals = [13]
+
     for interval in intervals:
 
         selectStr = "SELECT * FROM tradingview_alerts WHERE interval = '%s' ORDER BY time" % (str(interval))
@@ -58,12 +60,14 @@ def run():
         lastAction = ""
 
         currBalance = startBalance
+        lastBalance = 0
         noOfTrades = 0
         noOfTradesWon = 0
         noOfTradesLost = 0
         highestProfit = 0
         highestLoss = 0
         coinAmount = 0
+        positionCost = 0
 
         for row in rows:
             rowCounter += 1
@@ -83,35 +87,55 @@ def run():
 
                         # Close Position -> Not for first alert
 
-                        lastBalance = currBalance
                         feesAmount = coinAmount * alertPrice * fees
-                        currBalance = coinAmount * alertPrice / leverage - feesAmount
+                        closeReturn = coinAmount * alertPrice - feesAmount
 
-                        profit = currBalance - lastBalance
+                        if alertAction == 'buy':
+                            profit = positionCost - closeReturn
+                        else:
+                            profit = closeReturn - positionCost
 
-                        if profit >= 0:
+                        currBalance = lastBalance + profit
+
+                        profitPercent = (currBalance / lastBalance - 1) * 100
+
+                        if profitPercent >= 0:
                             noOfTradesWon += 1
                         else:
                             noOfTradesLost += 1
 
-                        profitPercent = (currBalance / lastBalance - 1) * 100
                         if profitPercent > highestProfit:
                             highestProfit = profitPercent
                         if profitPercent < highestLoss:
                             highestLoss = profitPercent
 
+                        '''
+                        print('Close Position', alertAction)
+                        print('Alert Price:', alertPrice)
+                        print('Last balance:', lastBalance)
+                        print('Close return:', closeReturn)
+                        print('Position cost:', positionCost)
+                        print('Coin amount:', coinAmount)
+                        print('Fees amount:', feesAmount)
+                        print('Current Balance:', currBalance)
+                        print('Profit %', profitPercent)
+                        print()
+                        '''
+
                     # Open new position
 
                     feesAmount = currBalance * leverage * fees
                     coinAmount = (currBalance * leverage - feesAmount) / alertPrice
+                    positionCost = currBalance * leverage
+                    lastBalance = currBalance
 
                     '''
-                    print('Action:', alertAction)
-                    print('Last price:', lastPrice)
-                    print('Alert price:', alertPrice)
-                    print('Profit:', profit)
-                    print('Profit %:', profitPercent)
+                    print('Open Position', alertAction)
+                    print('Alert Price:', alertPrice)
                     print('Current balance:', currBalance)
+                    print('Coin amount:', coinAmount)
+                    print('Fees amount:', feesAmount)
+                    print('positionCost:', positionCost)
                     print()
                     '''
 
