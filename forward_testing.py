@@ -27,6 +27,28 @@ def run():
 
     url = 'https://rt.pipedream.com/sql'
     hed = {'Authorization': 'Bearer ' + os.getenv("API_KEY")}
+
+    data = {'query': "SELECT DISTINCT ticker FROM tradingview_alerts"}
+
+    response = requests.post(url, json=data, headers=hed)
+
+    resultSet = response.json()["resultSet"]
+    rows = resultSet["Rows"]
+
+    pprint(resultSet)    
+
+    tickers = []
+    rowCounter = 0
+    for row in rows:
+        rowCounter += 1
+        columns = row["Data"]
+        if rowCounter > 1:
+            tickers.append(columns[0][columnName])
+
+    pprint(tickers)
+
+    return
+
     data = {'query': "SELECT DISTINCT interval FROM tradingview_alerts"}
 
     response = requests.post(url, json=data, headers=hed)
