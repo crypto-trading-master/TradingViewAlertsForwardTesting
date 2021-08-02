@@ -1,5 +1,6 @@
 {
-    "startBalance": 100,
-    "leverage": 10,
-    "fees": 0.0004
+    "startBalance": 1000,
+    "maxLeverage": 12,
+    "fees": 0.000665,
+    "risk": 0.2
 }

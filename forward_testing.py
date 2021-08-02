@@ -15,6 +15,7 @@ def run():
     startBalance = config['startBalance']
     fees = config['fees']
     maxLeverage = config['maxLeverage']
+    risk = config['risk']
 
     print('Max. leverage:', maxLeverage)
     print('Start Balance:', startBalance)
@@ -155,9 +156,10 @@ def run():
 
                             # Open new position
 
-                            feesAmount = currBalance * leverage * fees
-                            coinAmount = (currBalance * leverage - feesAmount) / alertPrice
-                            positionCost = currBalance * leverage
+                            buyBalance = currBalance * risk
+                            feesAmount = buyBalance * leverage * fees
+                            coinAmount = (buyBalance * leverage - feesAmount) / alertPrice
+                            positionCost = buyBalance * leverage
                             lastBalance = currBalance
 
                             '''
