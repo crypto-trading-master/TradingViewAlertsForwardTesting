@@ -45,7 +45,10 @@ def run():
 
     for ticker in tickers:
 
-        data = {'query': "SELECT DISTINCT interval FROM tradingview_alerts"}
+        print('Ticker:', ticker)
+        print()
+
+        data = {'query': "SELECT DISTINCT interval FROM tradingview_alerts WHERE ticker = '%s'" % (ticker)}
 
         response = requests.post(url, json=data, headers=hed)
 
@@ -66,7 +69,7 @@ def run():
 
         for interval in intervals:
 
-            selectStr = "SELECT * FROM tradingview_alerts WHERE interval = '%s' ORDER BY time" % (str(interval))
+            selectStr = "SELECT * FROM tradingview_alerts WHERE interval = '%s' AND ticker = '%s' ORDER BY time" % (str(interval), ticker)
             data = {'query': selectStr}
 
             response = requests.post(url, json=data, headers=hed)
