@@ -93,6 +93,7 @@ def run():
 
                 currBalance = startBalance
                 lastBalance = 0
+                lastPrice = 0
                 noOfTrades = 0
                 noOfTradesWon = 0
                 noOfTradesLost = 0
@@ -129,7 +130,7 @@ def run():
 
                                 currBalance = lastBalance + profit
 
-                                profitPercent = (currBalance / lastBalance - 1) * 100
+                                profitPercent = (alertPrice / lastPrice - 1) * leverage * 100
 
                                 if profitPercent >= 0:
                                     noOfTradesWon += 1
@@ -144,6 +145,7 @@ def run():
                                 '''
                                 print('Close Position', alertAction)
                                 print('Alert Price:', alertPrice)
+                                print('Last Price:', lastPrice)
                                 print('Last balance:', lastBalance)
                                 print('Close return:', closeReturn)
                                 print('Position cost:', positionCost)
@@ -161,6 +163,7 @@ def run():
                             coinAmount = (buyBalance * leverage - feesAmount) / alertPrice
                             positionCost = buyBalance * leverage
                             lastBalance = currBalance
+                            lastPrice = alertPrice
 
                             '''
                             print('Open Position', alertAction)
