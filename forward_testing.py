@@ -130,7 +130,7 @@ def run():
 
                                 currBalance = lastBalance + profit
 
-                                profitPercent = (alertPrice / lastPrice - 1) * leverage * 100
+                                profitPercent = (currBalance / lastBalance - 1) * leverage * 100
 
                                 if profitPercent >= 0:
                                     noOfTradesWon += 1
