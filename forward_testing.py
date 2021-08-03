@@ -14,7 +14,7 @@ def run():
 
     startBalance = config['startBalance']
     fees = config['fees']
-    maxLeverage = config['maxLeverage']
+    maxLeverage = 10
     risk = config['risk']
 
     print('Max. leverage:', maxLeverage)
@@ -40,6 +40,8 @@ def run():
         columns = row["Data"]
         if rowCounter > 1:
             tickers.append(columns[0][columnName])
+
+    tickers = ['AXSUSDT']
 
     for ticker in tickers:
 
@@ -68,7 +70,7 @@ def run():
 
         intervals.sort()
 
-        # intervals = [13]
+        intervals = ['1']
 
         for interval in intervals:
 
@@ -82,7 +84,7 @@ def run():
             resultSet = response.json()["resultSet"]
             rows = resultSet["Rows"]
 
-            leverage = 0
+            leverage = 9
 
             while leverage < maxLeverage:
 
@@ -130,7 +132,7 @@ def run():
 
                                 currBalance = lastBalance + profit
 
-                                profitPercent = (alertPrice / lastPrice - 1) * leverage * 100
+                                profitPercent = (currBalance / lastBalance - 1) * leverage * 100
 
                                 if profitPercent >= 0:
                                     noOfTradesWon += 1
@@ -142,19 +144,18 @@ def run():
                                 if profitPercent < highestLoss:
                                     highestLoss = profitPercent
 
-                                '''
                                 print('Close Position', alertAction)
                                 print('Alert Price:', alertPrice)
                                 print('Last Price:', lastPrice)
                                 print('Last balance:', lastBalance)
                                 print('Close return:', closeReturn)
                                 print('Position cost:', positionCost)
+                                print('Profit:', profit)
                                 print('Coin amount:', coinAmount)
                                 print('Fees amount:', feesAmount)
                                 print('Current Balance:', currBalance)
                                 print('Profit %', profitPercent)
                                 print()
-                                '''
 
                             # Open new position
 
@@ -165,15 +166,14 @@ def run():
                             lastBalance = currBalance
                             lastPrice = alertPrice
 
-                            '''
                             print('Open Position', alertAction)
                             print('Alert Price:', alertPrice)
                             print('Current balance:', currBalance)
+                            print('Buy balance:', positionCost)
                             print('Coin amount:', coinAmount)
                             print('Fees amount:', feesAmount)
                             print('positionCost:', positionCost)
                             print()
-                            '''
 
                         lastAction = alertAction
 
