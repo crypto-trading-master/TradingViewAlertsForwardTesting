@@ -12,12 +12,11 @@ def run():
 
     load_dotenv()
 
+    tableName = config['tableName']
     startBalance = config['startBalance']
     fees = config['fees']
     maxLeverage = config['maxLeverage']
     risk = config['risk']
-
-    maxLeverage = 20
 
     print('Max. leverage:', maxLeverage)
     print('Start Balance:', startBalance)
@@ -28,7 +27,7 @@ def run():
     url = 'https://rt.pipedream.com/sql'
     hed = {'Authorization': 'Bearer ' + os.getenv("API_KEY")}
 
-    data = {'query': "SELECT DISTINCT ticker FROM tradingview_alerts"}
+    data = {'query': "SELECT DISTINCT ticker FROM %s" % (tableName)}
 
     response = requests.post(url, json=data, headers=hed)
 
@@ -53,7 +52,7 @@ def run():
         highestBalance = 0
         resultData = {}
 
-        selectStr = "SELECT DISTINCT interval FROM tradingview_alerts WHERE ticker = '%s'" % (ticker)
+        selectStr = "SELECT DISTINCT interval FROM %s WHERE ticker = '%s'" % (tableName, ticker)
 
         data = {'query': selectStr}
 
@@ -78,7 +77,7 @@ def run():
 
             print('Calculate interval', interval)
 
-            selectStr = "SELECT * FROM tradingview_alerts WHERE interval = '%s' AND ticker = '%s' ORDER BY time" % (str(interval), ticker)
+            selectStr = "SELECT * FROM %s WHERE interval = '%s' AND ticker = '%s' ORDER BY time" % (tableName, str(interval), ticker)
 
             data = {'query': selectStr}
 
@@ -86,7 +85,7 @@ def run():
             resultSet = response.json()["resultSet"]
             rows = resultSet["Rows"]
 
-            leverage = 19
+            leverage = maxLeverage - 1
 
             while leverage < maxLeverage:
 
