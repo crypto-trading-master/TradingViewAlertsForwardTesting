@@ -17,6 +17,8 @@ def run():
     maxLeverage = config['maxLeverage']
     risk = config['risk']
 
+    maxLeverage = 20
+
     print('Max. leverage:', maxLeverage)
     print('Start Balance:', startBalance)
     print()
@@ -40,6 +42,8 @@ def run():
         columns = row["Data"]
         if rowCounter > 1:
             tickers.append(columns[0][columnName])
+
+    tickers = ['AXS-PERP-OPM', 'AXS-PERP-OPB', 'AXS-PERP-OPBC']
 
     for ticker in tickers:
 
@@ -82,7 +86,7 @@ def run():
             resultSet = response.json()["resultSet"]
             rows = resultSet["Rows"]
 
-            leverage = 0
+            leverage = 19
 
             while leverage < maxLeverage:
 
@@ -114,9 +118,9 @@ def run():
 
                         if alertAction != lastAction:
 
-                            noOfTrades += 1
-
                             if coinAmount > 0:
+
+                                noOfTrades += 1
 
                                 # Close Position -> Not for first alert
 
@@ -189,7 +193,6 @@ def run():
                     resultData["noOfTradesLost"] = noOfTradesLost
                     resultData["highestLoss"] = highestLoss
 
-                '''
                 print('Interval:', interval)
                 print('Final balance:', currBalance)
                 print('No. of trades:', noOfTrades)
@@ -198,8 +201,8 @@ def run():
                 print('No. of trades lost:', noOfTradesLost)
                 print('Highest loss %:', highestLoss)
                 print()
-                '''
 
+        '''
         print()
         print('Best result:')
         print('Interval:', resultData["interval"])
@@ -211,6 +214,7 @@ def run():
         print('No. of trades lost:', resultData["noOfTradesLost"])
         print('Highest loss %:', resultData["highestLoss"])
         print()
+        '''
 
 
 if __name__ == "__main__":

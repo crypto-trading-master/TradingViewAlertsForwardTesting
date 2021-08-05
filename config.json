@@ -2,5 +2,5 @@
     "startBalance": 1000,
     "maxLeverage": 12,
     "fees": 0.000665,
-    "risk": 0.2
+    "risk": 0.25
 }
