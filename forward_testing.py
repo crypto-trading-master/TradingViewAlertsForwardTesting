@@ -94,6 +94,7 @@ def run():
                 rowCounter = 0
                 lastAction = ""
 
+                liquidated = False
                 currBalance = startBalance
                 lastBalance = 0
                 lastPrice = 0
@@ -148,6 +149,9 @@ def run():
                                 if profitPercent < highestLoss:
                                     highestLoss = profitPercent
 
+                                if profitPercent <= -100:
+                                    liquidated = True
+
                                 '''
                                 print('Close Position', alertAction)
                                 print('Alert Price:', alertPrice)
@@ -187,18 +191,19 @@ def run():
                         timeDiff = endDateTime - startDateTime
                         tradeHours = round(timeDiff.total_seconds() / 3600, 0)
 
-                if currBalance > highestBalance:
-                    highestBalance = currBalance
+                if not liquidated:
+                    if currBalance > highestBalance:
+                        highestBalance = currBalance
 
-                    resultData["interval"] = interval
-                    resultData["leverage"] = leverage
-                    resultData["highestBalance"] = highestBalance
-                    resultData["noOfTrades"] = noOfTrades
-                    resultData["noOfTradesWon"] = noOfTradesWon
-                    resultData["highestProfit"] = highestProfit
-                    resultData["noOfTradesLost"] = noOfTradesLost
-                    resultData["highestLoss"] = highestLoss
-                    resultData["tradeHours"] = tradeHours
+                        resultData["interval"] = interval
+                        resultData["leverage"] = leverage
+                        resultData["highestBalance"] = highestBalance
+                        resultData["noOfTrades"] = noOfTrades
+                        resultData["noOfTradesWon"] = noOfTradesWon
+                        resultData["highestProfit"] = highestProfit
+                        resultData["noOfTradesLost"] = noOfTradesLost
+                        resultData["highestLoss"] = highestLoss
+                        resultData["tradeHours"] = tradeHours
 
                 '''
                 print('Interval:', interval)

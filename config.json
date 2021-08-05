@@ -1,7 +1,7 @@
 {
     "tableName": "tradingview_alerts",
     "startBalance": 1000,
-    "maxLeverage": 12,
+    "maxLeverage": 50,
     "fees": 0.000665,
     "risk": 0.2
 }
