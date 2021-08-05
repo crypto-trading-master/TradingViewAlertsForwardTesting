@@ -91,119 +91,126 @@ def run():
 
                 leverage += 1
 
-                rowCounter = 0
-                lastAction = ""
+                risk = 0
 
-                liquidated = False
-                currBalance = startBalance
-                lastBalance = 0
-                lastPrice = 0
-                noOfTrades = 0
-                noOfTradesWon = 0
-                noOfTradesLost = 0
-                highestProfit = 0
-                highestLoss = 0
-                coinAmount = 0
-                positionCost = 0
+                while risk < 1:
 
-                for row in rows:
-                    rowCounter += 1
-                    columns = row["Data"]
-                    if rowCounter > 1:
-                        alertTime = columns[0][columnName]
-                        alertTicker = columns[1][columnName]
-                        alertInterval = columns[2][columnName]
-                        alertAction = columns[3][columnName]
-                        alertPrice = float(columns[4][columnName])
+                    risk += 0.01
 
-                        if rowCounter == 2:
-                            startDateTime = parser.parse(alertTime)
+                    rowCounter = 0
+                    lastAction = ""
 
-                        if alertAction != lastAction:
+                    liquidated = False
+                    currBalance = startBalance
+                    lastBalance = 0
+                    lastPrice = 0
+                    noOfTrades = 0
+                    noOfTradesWon = 0
+                    noOfTradesLost = 0
+                    highestProfit = 0
+                    highestLoss = 0
+                    coinAmount = 0
+                    positionCost = 0
 
-                            if coinAmount > 0:
+                    for row in rows:
+                        rowCounter += 1
+                        columns = row["Data"]
+                        if rowCounter > 1:
+                            alertTime = columns[0][columnName]
+                            alertTicker = columns[1][columnName]
+                            alertInterval = columns[2][columnName]
+                            alertAction = columns[3][columnName]
+                            alertPrice = float(columns[4][columnName])
 
-                                noOfTrades += 1
+                            if rowCounter == 2:
+                                startDateTime = parser.parse(alertTime)
 
-                                # Close Position -> Not for first alert
+                            if alertAction != lastAction:
 
-                                feesAmount = coinAmount * alertPrice * fees
-                                closeReturn = coinAmount * alertPrice - feesAmount
+                                if coinAmount > 0:
 
-                                if alertAction == 'buy':
-                                    profit = positionCost - closeReturn
-                                else:
-                                    profit = closeReturn - positionCost
+                                    noOfTrades += 1
 
-                                currBalance = lastBalance + profit
+                                    # Close Position -> Not for first alert
 
-                                profitPercent = (currBalance / lastBalance - 1) * leverage * 100
+                                    feesAmount = coinAmount * alertPrice * fees
+                                    closeReturn = coinAmount * alertPrice - feesAmount
 
-                                if profitPercent >= 0:
-                                    noOfTradesWon += 1
-                                else:
-                                    noOfTradesLost += 1
+                                    if alertAction == 'buy':
+                                        profit = positionCost - closeReturn
+                                    else:
+                                        profit = closeReturn - positionCost
 
-                                if profitPercent > highestProfit:
-                                    highestProfit = profitPercent
-                                if profitPercent < highestLoss:
-                                    highestLoss = profitPercent
+                                    currBalance = lastBalance + profit
 
-                                if profitPercent <= -100:
-                                    liquidated = True
+                                    profitPercent = (currBalance / lastBalance - 1) * leverage * 100
+
+                                    if profitPercent >= 0:
+                                        noOfTradesWon += 1
+                                    else:
+                                        noOfTradesLost += 1
+
+                                    if profitPercent > highestProfit:
+                                        highestProfit = profitPercent
+                                    if profitPercent < highestLoss:
+                                        highestLoss = profitPercent
+
+                                    if profitPercent <= -100:
+                                        liquidated = True
+
+                                    '''
+                                    print('Close Position', alertAction)
+                                    print('Alert Price:', alertPrice)
+                                    print('Last Price:', lastPrice)
+                                    print('Last balance:', lastBalance)
+                                    print('Close return:', closeReturn)
+                                    print('Position cost:', positionCost)
+                                    print('Coin amount:', coinAmount)
+                                    print('Fees amount:', feesAmount)
+                                    print('Current Balance:', currBalance)
+                                    print('Profit %', profitPercent)
+                                    print()
+                                    '''
+
+                                # Open new position
+
+                                buyBalance = currBalance * risk
+                                feesAmount = buyBalance * leverage * fees
+                                coinAmount = (buyBalance * leverage - feesAmount) / alertPrice
+                                positionCost = buyBalance * leverage
+                                lastBalance = currBalance
+                                lastPrice = alertPrice
 
                                 '''
-                                print('Close Position', alertAction)
+                                print('Open Position', alertAction)
                                 print('Alert Price:', alertPrice)
-                                print('Last Price:', lastPrice)
-                                print('Last balance:', lastBalance)
-                                print('Close return:', closeReturn)
-                                print('Position cost:', positionCost)
+                                print('Current balance:', currBalance)
                                 print('Coin amount:', coinAmount)
                                 print('Fees amount:', feesAmount)
-                                print('Current Balance:', currBalance)
-                                print('Profit %', profitPercent)
+                                print('positionCost:', positionCost)
                                 print()
                                 '''
 
-                            # Open new position
+                            lastAction = alertAction
 
-                            buyBalance = currBalance * risk
-                            feesAmount = buyBalance * leverage * fees
-                            coinAmount = (buyBalance * leverage - feesAmount) / alertPrice
-                            positionCost = buyBalance * leverage
-                            lastBalance = currBalance
-                            lastPrice = alertPrice
+                            endDateTime = parser.parse(alertTime)
+                            timeDiff = endDateTime - startDateTime
+                            tradeHours = round(timeDiff.total_seconds() / 3600, 0)
 
-                            '''
-                            print('Open Position', alertAction)
-                            print('Alert Price:', alertPrice)
-                            print('Current balance:', currBalance)
-                            print('Coin amount:', coinAmount)
-                            print('Fees amount:', feesAmount)
-                            print('positionCost:', positionCost)
-                            print()
-                            '''
+                    if not liquidated:
+                        if currBalance > highestBalance:
+                            highestBalance = currBalance
 
-                        lastAction = alertAction
-
-                        endDateTime = parser.parse(alertTime)
-                        timeDiff = endDateTime - startDateTime
-                        tradeHours = round(timeDiff.total_seconds() / 3600, 0)
-
-                if not liquidated:
-                    if currBalance > highestBalance:
-                        highestBalance = currBalance
-
-                        resultData["interval"] = interval
-                        resultData["leverage"] = leverage
-                        resultData["highestBalance"] = highestBalance
-                        resultData["noOfTrades"] = noOfTrades
-                        resultData["noOfTradesWon"] = noOfTradesWon
-                        resultData["highestProfit"] = highestProfit
-                        resultData["noOfTradesLost"] = noOfTradesLost
-                        resultData["highestLoss"] = highestLoss
-                        resultData["tradeHours"] = tradeHours
+                            resultData["interval"] = interval
+                            resultData["leverage"] = leverage
+                            resultData["risk"] = risk
+                            resultData["highestBalance"] = highestBalance
+                            resultData["noOfTrades"] = noOfTrades
+                            resultData["noOfTradesWon"] = noOfTradesWon
+                            resultData["highestProfit"] = highestProfit
+                            resultData["noOfTradesLost"] = noOfTradesLost
+                            resultData["highestLoss"] = highestLoss
+                            resultData["tradeHours"] = tradeHours
 
                 '''
                 print('Interval:', interval)
@@ -220,6 +227,7 @@ def run():
         print('Best result:')
         print('Interval:', resultData["interval"])
         print('Leverage:', resultData["leverage"])
+        print('Risk:', resultData["risk"])
         print('Final balance:', resultData["highestBalance"])
         print('No. of trades:', resultData["noOfTrades"])
         print('No. of trades won:', resultData["noOfTradesWon"])
