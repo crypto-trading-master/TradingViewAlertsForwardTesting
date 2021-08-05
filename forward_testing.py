@@ -1,8 +1,9 @@
-from pprint import pprint
-from dotenv import load_dotenv
 import json
 import requests
 import os
+from pprint import pprint
+from dotenv import load_dotenv
+from dateutil import parser
 
 
 def run():
@@ -12,6 +13,7 @@ def run():
 
     load_dotenv()
 
+    tableName = config['tableName']
     startBalance = config['startBalance']
     fees = config['fees']
     maxLeverage = config['maxLeverage']
@@ -26,7 +28,8 @@ def run():
     url = 'https://rt.pipedream.com/sql'
     hed = {'Authorization': 'Bearer ' + os.getenv("API_KEY")}
 
-    data = {'query': "SELECT DISTINCT ticker FROM tradingview_alerts"}
+    selectStr = "SELECT DISTINCT ticker FROM %s" % (tableName)
+    data = {'query': selectStr}
 
     response = requests.post(url, json=data, headers=hed)
 
@@ -49,7 +52,7 @@ def run():
         highestBalance = 0
         resultData = {}
 
-        selectStr = "SELECT DISTINCT interval FROM tradingview_alerts WHERE ticker = '%s'" % (ticker)
+        selectStr = "SELECT DISTINCT interval FROM %s WHERE ticker = '%s'" % (tableName, ticker)
 
         data = {'query': selectStr}
 
@@ -74,7 +77,7 @@ def run():
 
             print('Calculate interval', interval)
 
-            selectStr = "SELECT * FROM tradingview_alerts WHERE interval = '%s' AND ticker = '%s' ORDER BY time" % (str(interval), ticker)
+            selectStr = "SELECT * FROM %s WHERE interval = '%s' AND ticker = '%s' ORDER BY time" % (tableName, str(interval), ticker)
 
             data = {'query': selectStr}
 
@@ -112,11 +115,14 @@ def run():
                         alertAction = columns[3][columnName]
                         alertPrice = float(columns[4][columnName])
 
+                        if rowCounter == 2:
+                            startDateTime = parser.parse(alertTime)
+
                         if alertAction != lastAction:
 
-                            noOfTrades += 1
-
                             if coinAmount > 0:
+
+                                noOfTrades += 1
 
                                 # Close Position -> Not for first alert
 
@@ -177,6 +183,10 @@ def run():
 
                         lastAction = alertAction
 
+                        endDateTime = parser.parse(alertTime)
+                        timeDiff = endDateTime - startDateTime
+                        tradeHours = round(timeDiff.total_seconds() / 3600, 0)
+
                 if currBalance > highestBalance:
                     highestBalance = currBalance
 
@@ -188,6 +198,7 @@ def run():
                     resultData["highestProfit"] = highestProfit
                     resultData["noOfTradesLost"] = noOfTradesLost
                     resultData["highestLoss"] = highestLoss
+                    resultData["tradeHours"] = tradeHours
 
                 '''
                 print('Interval:', interval)
@@ -210,6 +221,7 @@ def run():
         print('Highest profit %:', resultData["highestProfit"])
         print('No. of trades lost:', resultData["noOfTradesLost"])
         print('Highest loss %:', resultData["highestLoss"])
+        print('Trading hours', resultData["tradeHours"])
         print()
 
 
