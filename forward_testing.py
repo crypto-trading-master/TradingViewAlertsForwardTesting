@@ -4,6 +4,7 @@ import os
 from pprint import pprint
 from dotenv import load_dotenv
 from dateutil import parser
+from prettytable import PrettyTable  # type: ignore
 
 
 def run():
@@ -17,7 +18,9 @@ def run():
     startBalance = config['startBalance']
     fees = config['fees']
     maxLeverage = config['maxLeverage']
-    risk = config['risk']
+    riskStep = config['riskStep']
+    tickers = []
+    tickers = config['tickers']
 
     print('Max. leverage:', maxLeverage)
     print('Start Balance:', startBalance)
@@ -36,13 +39,13 @@ def run():
     resultSet = response.json()["resultSet"]
     rows = resultSet["Rows"]
 
-    tickers = []
-    rowCounter = 0
-    for row in rows:
-        rowCounter += 1
-        columns = row["Data"]
-        if rowCounter > 1:
-            tickers.append(columns[0][columnName])
+    if len(tickers) == 0:
+        rowCounter = 0
+        for row in rows:
+            rowCounter += 1
+            columns = row["Data"]
+            if rowCounter > 1:
+                tickers.append(columns[0][columnName])
 
     for ticker in tickers:
 
@@ -95,7 +98,7 @@ def run():
 
                 while risk < 1:
 
-                    risk += 0.01
+                    risk += riskStep
 
                     rowCounter = 0
                     lastAction = ""
