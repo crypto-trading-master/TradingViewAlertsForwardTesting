@@ -31,15 +31,15 @@ def run():
     url = 'https://rt.pipedream.com/sql'
     hed = {'Authorization': 'Bearer ' + os.getenv("API_KEY")}
 
-    selectStr = "SELECT DISTINCT ticker FROM %s" % (tableName)
-    data = {'query': selectStr}
-
-    response = requests.post(url, json=data, headers=hed)
-
-    resultSet = response.json()["resultSet"]
-    rows = resultSet["Rows"]
-
     if len(tickers) == 0:
+        selectStr = "SELECT DISTINCT ticker FROM %s" % (tableName)
+        data = {'query': selectStr}
+
+        response = requests.post(url, json=data, headers=hed)
+
+        resultSet = response.json()["resultSet"]
+        rows = resultSet["Rows"]
+
         rowCounter = 0
         for row in rows:
             rowCounter += 1
@@ -54,6 +54,8 @@ def run():
 
         highestBalance = 0
         resultData = {}
+        resultTable = PrettyTable()
+        resultTable.field_names = ['Interval', 'Leverage', 'Risk', 'Final balance', 'No. of trades', 'No. of trades won', 'Highest profit %', 'No. of trades lost', 'Highest loss %', 'Trading hours']
 
         selectStr = "SELECT DISTINCT interval FROM %s WHERE ticker = '%s'" % (tableName, ticker)
 
@@ -96,7 +98,7 @@ def run():
 
                 risk = 0
 
-                while risk < 1:
+                while risk < 0.5:
 
                     risk += riskStep
 
@@ -215,6 +217,19 @@ def run():
                             resultData["highestLoss"] = highestLoss
                             resultData["tradeHours"] = tradeHours
 
+                        resultRow = []
+                        resultRow.append(interval)
+                        resultRow.append(leverage)
+                        resultRow.append(risk)
+                        resultRow.append(currBalance)
+                        resultRow.append(noOfTrades)
+                        resultRow.append(noOfTradesWon)
+                        resultRow.append(highestProfit)
+                        resultRow.append(noOfTradesLost)
+                        resultRow.append(highestLoss)
+                        resultRow.append(tradeHours)
+                        resultTable.add_row(resultRow)
+
                 '''
                 print('Interval:', interval)
                 print('Final balance:', currBalance)
@@ -225,7 +240,7 @@ def run():
                 print('Highest loss %:', highestLoss)
                 print()
                 '''
-
+        '''
         print()
         print('Best result:')
         print('Interval:', resultData["interval"])
@@ -239,6 +254,11 @@ def run():
         print('Highest loss %:', resultData["highestLoss"])
         print('Trading hours', resultData["tradeHours"])
         print()
+        '''
+
+        resultTable.sortby = 'Final balance'
+        resultTable.reversesort = True
+        print(resultTable)
 
 
 if __name__ == "__main__":
