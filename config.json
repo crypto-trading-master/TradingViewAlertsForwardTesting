@@ -1,7 +1,7 @@
 {
     "tableName": "candle_type_alerts",
-    "startBalance": 10000,
-    "maxLeverage": 12,
+    "startBalance": 1000,
+    "maxLeverage": 10,
     "fees": 0.000665,
-    "risk": 0.20
+    "risk": 0.10
 }

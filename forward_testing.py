@@ -42,7 +42,7 @@ def run():
         if rowCounter > 1:
             tickers.append(columns[0][columnName])
 
-    tickers = ['AXS-PERP-OPM', 'AXS-PERP-OPB', 'AXS-PERP-OPBC']
+    tickers = ['BTC-PERP-OPM', 'BTC-PERP-OPB', 'BTC-PERP-OPBC']
 
     for ticker in tickers:
 
