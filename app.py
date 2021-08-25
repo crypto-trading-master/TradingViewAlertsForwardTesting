@@ -1,62 +1,64 @@
 import json
-import requests
 import os
+
+from flask import Flask, jsonify
+from flask_sqlalchemy import SQLAlchemy
 from pprint import pprint
 from dotenv import load_dotenv
+from datetime import datetime
 from dateutil import parser
-from prettytable import PrettyTable  # type: ignore
+from prettytable import PrettyTable
 
+app = Flask(__name__)
 
-def run():
+load_dotenv()
 
-    with open('config.json', 'r') as f:
-        config = json.load(f)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    load_dotenv()
+db = SQLAlchemy(app)
 
-    tableName = config['tableName']
-    startBalance = config['startBalance']
-    fees = config['fees']
-    maxLeverage = config['maxLeverage']
-    riskStep = config['riskStep']
-    tickers = []
-    tickers = config['tickers']
+class Alert(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    strategy = db.Column(db.String(100))
+    ticker = db.Column(db.String(20))
+    interval = db.Column(db.Integer)
+    action = db.Column(db.String(10))
+    chartTime = db.Column(db.DateTime)
+    time = db.Column(db.DateTime)
+    chartPrice = db.Column(db.Numeric(20,10))
+    price = db.Column(db.Numeric(20,10))    
 
-    print('Max. leverage:', maxLeverage)
-    print('Start Balance:', startBalance)
-    print()
+with open('config.json', 'r') as f:
+    config = json.load(f)
+    
+startBalance = config['startBalance']
+fees = config['fees']
+maxLeverage = config['maxLeverage']
+riskStep = config['riskStep']
+tickers = []
+tickers = config['tickers']
 
-    columnName = "VarCharValue"
+@ app.route('/', methods=['GET'])
+def main():    
 
-    url = 'https://rt.pipedream.com/sql'
-    hed = {'Authorization': 'Bearer ' + os.getenv("API_KEY")}
-
-    if len(tickers) == 0:
-        selectStr = "SELECT DISTINCT ticker FROM %s" % (tableName)
-        data = {'query': selectStr}
-
-        response = requests.post(url, json=data, headers=hed)
-
-        resultSet = response.json()["resultSet"]
-        rows = resultSet["Rows"]
-
-        rowCounter = 0
-        for row in rows:
-            rowCounter += 1
-            columns = row["Data"]
-            if rowCounter > 1:
-                tickers.append(columns[0][columnName])
-
-    for ticker in tickers:
-
-        print('Ticker:', ticker)
-        print()
+    for ticker in tickers:        
 
         highestBalance = 0
         resultData = {}
         resultTable = PrettyTable()
         resultTable.field_names = ['Interval', 'Leverage', 'Risk', 'Final balance', 'No. of trades', 'No. of trades won', 'Highest profit %', 'No. of trades lost', 'Highest loss %', 'Trading hours']
+        
+        alerts = Alert.query.filter(Alert.ticker == ticker).order_by(Alert.id).all()        
 
+        return {
+            "ticker": ticker,
+            "maxLeverage": maxLeverage,
+            "startBalance": startBalance,
+            "alerts": len(alerts)
+        }
+        
+        '''
         selectStr = "SELECT DISTINCT interval FROM %s WHERE ticker = '%s'" % (tableName, ticker)
 
         data = {'query': selectStr}
@@ -163,7 +165,7 @@ def run():
                                     if profitPercent <= -100:
                                         liquidated = True
 
-                                    '''
+                                    
                                     print('Close Position', alertAction)
                                     print('Alert Price:', alertPrice)
                                     print('Last Price:', lastPrice)
@@ -175,7 +177,7 @@ def run():
                                     print('Current Balance:', currBalance)
                                     print('Profit %', profitPercent)
                                     print()
-                                    '''
+                                    
 
                                 # Open new position
 
@@ -186,7 +188,7 @@ def run():
                                 lastBalance = currBalance
                                 lastPrice = alertPrice
 
-                                '''
+                                
                                 print('Open Position', alertAction)
                                 print('Alert Price:', alertPrice)
                                 print('Current balance:', currBalance)
@@ -194,7 +196,7 @@ def run():
                                 print('Fees amount:', feesAmount)
                                 print('positionCost:', positionCost)
                                 print()
-                                '''
+                                
 
                             lastAction = alertAction
 
@@ -230,7 +232,7 @@ def run():
                         resultRow.append(tradeHours)
                         resultTable.add_row(resultRow)
 
-                '''
+                
                 print('Interval:', interval)
                 print('Final balance:', currBalance)
                 print('No. of trades:', noOfTrades)
@@ -239,8 +241,8 @@ def run():
                 print('No. of trades lost:', noOfTradesLost)
                 print('Highest loss %:', highestLoss)
                 print()
-                '''
-        '''
+                
+        
         print()
         print('Best result:')
         print('Interval:', resultData["interval"])
@@ -254,12 +256,9 @@ def run():
         print('Highest loss %:', resultData["highestLoss"])
         print('Trading hours', resultData["tradeHours"])
         print()
-        '''
+        
 
         resultTable.sortby = 'Final balance'
         resultTable.reversesort = True
         print(resultTable)
-
-
-if __name__ == "__main__":
-    run()
+        '''

@@ -1,8 +1,7 @@
-{
-    "tableName": "tradingview_alerts",
-    "tickers": ["BTCPERP"],
+{    
+    "tickers": ["AXS-PERP"],
     "startBalance": 1000,
-    "maxLeverage": 50,
+    "maxLeverage": 10,
     "fees": 0.000665,
     "riskStep": 0.05
 }

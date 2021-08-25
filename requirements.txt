@@ -1,3 +1,7 @@
 python-dateutil
 python-dotenv
 prettyTable
+flask
+flask-sqlalchemy
+gunicorn
+mysqlclient
