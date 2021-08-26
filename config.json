@@ -1,5 +1,5 @@
 {    
-    "tickers": ["AXS-PERP"],
+    "tickers": [],
     "startBalance": 1000,
     "maxLeverage": 10,
     "fees": 0.000665,
