@@ -1,7 +1,7 @@
 {    
     "tickers": [],
     "startBalance": 1000,
-    "maxLeverage": 10,
+    "maxLeverage": 1,
     "fees": 0.000665,
     "riskStep": 0.1
 }
