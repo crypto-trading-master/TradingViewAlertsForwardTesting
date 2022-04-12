@@ -167,7 +167,7 @@ def main():
     
     df.rename(columns={ 'strategy': 'Strategy',
                         'ticker': 'Ticker',
-                        'interval': 'Interval',
+                        'interval': 'Interval min',
                         'leverage': 'Leverage',
                         'risk': 'Risk',
                         'endBalance': 'End balance',
