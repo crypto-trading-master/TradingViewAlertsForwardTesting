@@ -160,7 +160,7 @@ def main():
                 
                 df = df.append(resultData, ignore_index=True)                        
     
-    df.sort_values(['strategy','ticker','interval'], inplace=True, ascending=True)
+    df.sort_values(['ticker','profit'], inplace=True, ascending=False)
     df['interval'] = df['interval'].map('{:,.0f}'.format)
     df['leverage'] = df['leverage'].map('{:,.0f}'.format)
     df['noOfTrades'] = df['noOfTrades'].map('{:,.0f}'.format)
