@@ -136,7 +136,10 @@ def main():
                     lastAction = alertAction
 
                 profitPercent = (currBalance / startBalance - 1) * 100
-                winRate = noOfTradesWon / noOfTrades
+                if noOfTrades > 0:
+                    winRate = noOfTradesWon / noOfTrades
+                else:
+                    winRate = 0
                 endDateTime = alertTime
                 timeDiff = endDateTime - startDateTime
                 tradeHours = round(timeDiff.total_seconds() / 3600, 0)                    
