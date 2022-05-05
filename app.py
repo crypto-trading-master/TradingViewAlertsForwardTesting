@@ -134,13 +134,14 @@ def main():
                         # Open new position
                         
                         if alertAction in ['buy','sell']:
-
                             buyBalance = currBalance * risk
                             feesAmount = buyBalance * leverage * fees
                             coinAmount = (buyBalance * leverage - feesAmount) / alertPrice
                             positionCost = buyBalance * leverage
                             lastBalance = currBalance
                             lastPrice = alertPrice
+                        else: # Position closed
+                            coinAmount = 0
 
                     lastAction = alertAction
 
