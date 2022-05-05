@@ -105,10 +105,17 @@ def main():
                             feesAmount = coinAmount * alertPrice * fees
                             closeReturn = coinAmount * alertPrice - feesAmount
 
+                            if lastAction == 'sell':
+                                profit = positionCost - closeReturn
+                            else:
+                                profit = closeReturn - positionCost
+                                                        
+                            """
                             if alertAction == 'buy':
                                 profit = positionCost - closeReturn
                             else:
                                 profit = closeReturn - positionCost
+                            """
 
                             currBalance = lastBalance + profit
 
@@ -125,13 +132,15 @@ def main():
                                 highestLoss = profitPercent                                
                             
                         # Open new position
+                        
+                        if alertAction in ['buy','sell']:
 
-                        buyBalance = currBalance * risk
-                        feesAmount = buyBalance * leverage * fees
-                        coinAmount = (buyBalance * leverage - feesAmount) / alertPrice
-                        positionCost = buyBalance * leverage
-                        lastBalance = currBalance
-                        lastPrice = alertPrice
+                            buyBalance = currBalance * risk
+                            feesAmount = buyBalance * leverage * fees
+                            coinAmount = (buyBalance * leverage - feesAmount) / alertPrice
+                            positionCost = buyBalance * leverage
+                            lastBalance = currBalance
+                            lastPrice = alertPrice
 
                     lastAction = alertAction
 
